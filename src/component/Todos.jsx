@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import '../index.css'
 
 function Todos() {
   const [text,setText] = useState('');
@@ -8,15 +9,21 @@ function Todos() {
 
   const handleChange = (e)=>{
     setText(e.target.value);
-  }
+  }  
 
   const handletodos = (e)=>{
+    if(text===''){
+      alert("Please write something!")
+      return
+    }
     setText('');
     setTodos([...todos,text]);
   }
 
   const handleDelete = (index) =>{
-       return setTodos(todos.filter((todo,i)=>(i!==index)));
+      if(window.confirm("Are you sure?")){
+        setTodos(todos.filter((todo,i)=>(i!==index)));
+      }
   }
 
 
@@ -27,8 +34,13 @@ function Todos() {
   }
 
   const handleUpdate = ()=>{
+     if(text===''){
+      alert("Please write something!")
+      return
+    }
     const updatedTodos = [...todos];
     updatedTodos[currentIndex] = text;
+    setTodos(updatedTodos);
     setCurrentIndex(null)
     setIsEditing(false)
     setText('')
@@ -43,10 +55,21 @@ function Todos() {
     }
   }
   }
-  
+
+  useEffect(()=>{
+    const savedTodos = JSON.parse(localStorage.getItem('todos'))
+    if(savedTodos && savedTodos.length > 0){
+      setTodos(savedTodos)
+    }
+  },[])
+
+  useEffect(()=>{
+    localStorage.setItem('todos',JSON.stringify(todos))
+  },[todos])
+
   return (
     <>
-    <div style={{paading:"10px"}}>
+    <div style={{padding:"10px"}}>
       <input type="text" 
       onChange={handleChange}
       onKeyDown={handleKeydown}
@@ -59,12 +82,13 @@ function Todos() {
     <div style={{padding:"10px"}}>
         <ul>
           {todos.map((todo,index,arr)=>(
-            <div>
-                 <li key={index} style={{display:"flex",justifyContent:"space-between",padding:"10px",background:"wheat",color:"black"}}>{todo}
+            <div key={index} style={{marginBottom:"3px"}}>
+                 <li  className={index===todos.length-1? "fade-in" : ""} style={{display:"flex",justifyContent:"space-between",padding:"10px",background:"wheat",color:"black",borderRadius:"5px"}}>{todo}
+                    <div style={{display:"flex",gap:"2px"}}>
                       <button style={{padding:"3px",background:"red",color:"white"}} onClick={()=>(handleDelete(index))}>Delete</button>
                       <button style={{padding:"3px",background:"green",color:"white"}} onClick={()=>(handleEdit(index))}>Edit</button>
+                    </div>
                  </li>
-               
             </div>
             ))}
         </ul>
